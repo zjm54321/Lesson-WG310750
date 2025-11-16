@@ -20,7 +20,7 @@ int8_t main(void) {
         adc_value = ADC_Read(0x03); // 读取Rb2
 
         // 显示ADC值
-        nixie_display_number(adc_value);
+        nixie_display_u8(adc_value);
     }
 }
 

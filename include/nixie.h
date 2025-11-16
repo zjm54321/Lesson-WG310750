@@ -14,6 +14,7 @@ uint8_t nixie_table[] = {
     0xF8, // "7"
     0x80, // "8"
     0x90, // "9"
+    0x7F, // "."
     0x88, // "A"
     0x83, // "B"
     0xC6, // "C"
@@ -30,4 +31,6 @@ uint8_t nixie_table[] = {
     0xFF  // 熄灭
 };
 
-void nixie_display_number(uint8_t number);
+inline void nixie_display(uint8_t location, uint8_t digit);
+void nixie_display_u8(uint8_t number);
+void nixie_display_fpu8(float number);
