@@ -8,7 +8,7 @@
 #include <softdelay.h>
 #include <stdint.h>
 
-int main(void) {
+int32_t main(void) {
     P2 = ((P2 & 0x1f) | 0x80);
     // 从P00到P07依次点亮LED灯
     for (;;) {

@@ -6,24 +6,25 @@
 #include <utility.h>
 #include <stc51.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-void Timer0_Init(void);
-void Delay_10us(void);
+void timer0_init(void);
+void delay10us(void);
 
 int main(void) {
     uint8_t pwm_duty = 0;
     uint8_t pwm_count = 0;
     uint16_t breath_counter = 0;
-    bit direction = 1;
+    bool direction = 1;
 
     P2 = ((P2 & 0x1f) | 0x80);
     P0 = 0x00;
 
-    Timer0_Init();
+    timer0_init();
 
     for (;;) {
         // PWM周期控制
-        Delay_10us();
+        delay10us();
         pwm_count++;
 
         // 根据占空比控制LED亮度
@@ -33,27 +34,22 @@ int main(void) {
         if (++breath_counter >= 200) {
             breath_counter = 0;
 
-            if (direction) {
-                if (++pwm_duty >= 250) {
-                    direction = 0; // 切换到递减
-                }
-            } else {
-                if (pwm_duty-- == 0) {
-                    direction = 1; // 切换到递增
-                }
+            pwm_duty += direction ? 1 : -1;
+            if (pwm_duty == 0 || pwm_duty >= 250) {
+                direction = !direction;
             }
         }
     }
 }
 
-void Timer0_Init(void) {
+inline void timer0_init(void) {
     TMOD = 0x01; // 定时器0工作在模式1(16位)
     TH0 = (65536 - 10) >> 8;
     TL0 = (65536 - 10) & 0xFF;
     TR0 = 1; // 启动定时器
 }
 
-void Delay_10us(void) {
+inline void delay10us(void) {
     while (!TF0)
         ;    // 等待定时器溢出
     TF0 = 0; // 清除溢出标志

@@ -6,46 +6,30 @@
 #include <utility.h>
 #include <stc51.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <i2c.h>
 #include <nixie.h>
+#include <timer.h>
 
-uint8_t ADC_Read(uint8_t ADC_Add);
+static volatile uint8_t adc_value = 0;
 
-int8_t main(void) {
-    uint8_t adc_value = 0;
+int32_t main(void) {
 
-    for (;;) {
-        // 读取ADC值
-        adc_value = ADC_Read(0x03); // 读取Rb2
+    timer0_init_10ms();
+    timer1_init_10ms();
+    EA = 1; // 全局中断使能
 
-        // 显示ADC值
-        nixie_display_u8(adc_value);
-    }
+    for (;;)
+        ;
 }
 
-/**
- * @brief 读取ADC值
- * @param ADC_Add ADC通道地址 (0-3)
- * @return 8位ADC转换结果 (0-255)
- */
-uint8_t ADC_Read(uint8_t ADC_Add) {
-    uint8_t ADC_Read_Data = 0;
+void timer0_isr(void) interrupt(1) { nixie_display_u8(adc_value); }
 
-    // 主设备给从设备发送/写入数据
-    i2c_start();
-    i2c_sendbyte(0x90); // 写地址
-    i2c_waitack();
-    i2c_sendbyte(0x40 | ADC_Add); // 控制字节
-    i2c_waitack();
-
-    // 主设备给从设备接收/读取数据
-    i2c_start();
-    i2c_sendbyte(0x91); // 读地址
-    i2c_waitack();
-    ADC_Read_Data = i2c_receivebyte();
-    i2c_sendack(1);
-    i2c_stop();
-
-    return ADC_Read_Data;
+void timer1_isr(void) interrupt(3) {
+    static uint8_t count = 0;
+    if (++count >= 5) {
+        count = 0;
+        adc_value = adc_pcf8591(0x03); // 读取ADC值（Rb2）
+    }
 }
