@@ -60,3 +60,13 @@ void nixie_display_fpu8(uint16_t number) {
     nixie_display(1, (number / 10) % 10);
     nixie_display(2, number / 100);
 }
+
+void nixie_display_stopwatch(uint8_t minutes, uint8_t seconds) {
+    P26 = 1;
+    P27 = 1;
+    nixie_display(0, seconds % 10);
+    nixie_display(1, seconds / 10);
+    nixie_display(2, 23); // 显示'-'
+    nixie_display(3, minutes % 10);
+    nixie_display(4, minutes / 10);
+}
