@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <softdelay.h>
 
-#include <i2c.h>
 #include <nixie.h>
 #include <timer.h>
 #include <exit.h>

@@ -15,7 +15,7 @@
 #include <timer.h>
 
 void format_adc(float number, uint8_t *buffer);
-void send_serial(const uint8_t *data_ptr);
+void send_serial(uint8_t *data_ptr);
 
 static volatile uint8_t *serial_ptr = NULL;
 static volatile uint8_t adc_value = 0;
@@ -34,8 +34,8 @@ int32_t main(void) {
             adc_value_pre = adc_value;
             float adc_value_f =
                 (float)adc_value / 255.0f * 5.0f; // 转换为0-5V范围内的浮点数
-            uint8_t buffer[15];
             adc_fpu8 = (uint16_t)(adc_value_f * 100) % 1000;
+            uint8_t buffer[16];
             format_adc(adc_value_f, buffer);
             send_serial(buffer);
         }
@@ -60,7 +60,7 @@ void serial_interrupt_handler(void) interrupt(4) {
             SBUF = *serial_ptr; // 发送当前字节
             serial_ptr++;       // 指针移到下一个字节
         } else {
-            serial_ptr = 0;
+            serial_ptr = NULL;
         }
     }
 
@@ -68,8 +68,8 @@ void serial_interrupt_handler(void) interrupt(4) {
         RI = 0;
 }
 
-inline void send_serial(const uint8_t *data_ptr) {
-    while (serial_ptr != 0)
+inline void send_serial(uint8_t *data_ptr) {
+    while (serial_ptr != NULL)
         ;
     serial_ptr = data_ptr;
     TI = 1;
@@ -79,5 +79,5 @@ inline void format_adc(float number, uint8_t *buffer) {
     uint8_t integer_part = (uint8_t)number;
     uint8_t decimal_part = (uint8_t)((number - integer_part) * 100);
     //  使用sprintf格式化字符串
-    sprintf(buffer, "Voltage: %d.%02d\n", integer_part, decimal_part);
+    sprintf(buffer, "Voltage: %d.%02dV\n", integer_part, decimal_part);
 }
