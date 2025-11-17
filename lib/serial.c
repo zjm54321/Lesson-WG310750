@@ -3,8 +3,6 @@
 
 void serial_init(void)
 {
-
-
     SCON = 0x50;
     TMOD = 0x20;
     TH1  = 0xFD;
